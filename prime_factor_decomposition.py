@@ -1,49 +1,39 @@
-def is_prime(x):
-    primelist = [2]
-    if x < 2:
-        return False
-    if x == 2:
-        return True
-    for n in range(3,x+1):
-        divisible = False
-        for prime in primelist:
-            if n % prime == 0:
-                divisible = True
-                break
-        if n != x:
-            if not divisible:
-                primelist.append(n)
-        elif n == x:
-            return not divisible
-        
-def first_prime_factor(x):
-    for i in [o for o in list(range(2,x+1)) if is_prime(o)]:
-        if x % i == 0:
-            return i
-
-
 def prime_factor_decomposition(x):
-    # part 1 - finding them
-    if is_prime(x):
-        return f"{x}"
-    if x <= 1:
+    if x < 2:
         return None
+    # part 1 - pre compute primes for efficiency (I believe that this is still the most time consuming part of the algorithm.)
+    precomputedprimes = [2]
+    for i in list(range(3, (x+1)//2 +1)) + [x]:
+        dv = False
+        for p in precomputedprimes:
+            if i % p == 0:
+                dv = True
+                break
+        if not dv:
+            precomputedprimes.append(i)
+    if precomputedprimes[-1] == x:
+        return f"{x}"
+    #part 2 - decomposing time
     primes = []
-    non_prime = x
+    other = x
     non_prime_present = True
     while non_prime_present:
-        fpf=first_prime_factor(non_prime)
+        fpf = None
+        for p in precomputedprimes:
+            if other % p == 0:
+                fpf = p
+
+        other = int(other/fpf)
         primes.append(fpf)
-        non_prime_present = not is_prime(int(non_prime/fpf))
-        if not non_prime_present:
-            
-            primes.append(int(non_prime/fpf))
-        non_prime = int(non_prime/fpf)
+        non_prime_present = not other in precomputedprimes
+        if not non_prime_present: 
+            primes.append(other)
         
-    # part 2 - making them look good
+    
+    # part 3 - making them look good
     counts = {}
     result_strings = []
-    for i in primes:
+    for i in sorted(primes):
         if i in counts:
             counts[i] += 1
         else:
@@ -55,5 +45,6 @@ def prime_factor_decomposition(x):
             result_strings.append(f"{key}")
     return " × ".join(result_strings)
 
-for i in range(0,10000):
-    print(f"{i} --- {prime_factor_decomposition(i)}")
+print("PRIME FACTORISATION PROGRAM")
+x = int(input("x?: "))
+print(f"{prime_factor_decomposition(x)}")
